@@ -1,4 +1,4 @@
-def print_menu():
+def print_menu() -> None:
     print("\n📚 Book Collection App")
     print("1. Add a book")
     print("2. List books")
@@ -22,7 +22,7 @@ def get_user_choice() -> str:
         return choice
 
 
-def get_book_details():
+def get_book_details() -> tuple[str, str, int]:
     """Prompt the user for details of a new book via the terminal.
 
     Takes no parameters; all values are collected interactively from
@@ -53,14 +53,3 @@ def get_book_details():
         year = 0
 
     return title, author, year
-
-
-def print_books(books):
-    if not books:
-        print("No books in your collection.")
-        return
-
-    print("\nYour Books:")
-    for index, book in enumerate(books, start=1):
-        status = "✅ Read" if book.read else "📖 Unread"
-        print(f"{index}. {book.title} by {book.author} ({book.year}) - {status}")

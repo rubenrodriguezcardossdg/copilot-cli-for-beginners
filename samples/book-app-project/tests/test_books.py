@@ -26,6 +26,42 @@ def test_add_book():
     assert book.year == 1949
     assert book.read is False
 
+def test_add_duplicate_book_raises_value_error():
+    collection = BookCollection()
+    collection.add_book("1984", "George Orwell", 1949)
+    with pytest.raises(ValueError):
+        collection.add_book("1984", "George Orwell", 1949)
+    assert len(collection.books) == 1
+
+def test_add_duplicate_book_case_insensitive_raises_value_error():
+    collection = BookCollection()
+    collection.add_book("1984", "George Orwell", 1949)
+    with pytest.raises(ValueError):
+        collection.add_book("1984", "GEORGE ORWELL", 1949)
+    assert len(collection.books) == 1
+
+def test_add_book_empty_title_raises_value_error():
+    collection = BookCollection()
+    with pytest.raises(ValueError):
+        collection.add_book("", "George Orwell", 1949)
+    assert len(collection.books) == 0
+
+def test_add_book_whitespace_title_raises_value_error():
+    collection = BookCollection()
+    with pytest.raises(ValueError):
+        collection.add_book("   ", "George Orwell", 1949)
+    assert len(collection.books) == 0
+
+def test_mark_as_read_empty_title_raises_value_error():
+    collection = BookCollection()
+    with pytest.raises(ValueError):
+        collection.mark_as_read("")
+
+def test_remove_book_empty_title_raises_value_error():
+    collection = BookCollection()
+    with pytest.raises(ValueError):
+        collection.remove_book("   ")
+
 def test_mark_book_as_read():
     collection = BookCollection()
     collection.add_book("Dune", "Frank Herbert", 1965)
