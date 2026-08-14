@@ -2,6 +2,7 @@ import sys
 from typing import List
 
 from books import Book, BookCollection
+from exceptions import StorageError, ValidationError
 
 
 # Global collection instance
@@ -44,9 +45,9 @@ def handle_add() -> None:
     try:
         collection.add_book(title, author, year)
         print("\nBook added successfully.\n")
-    except ValueError as e:
+    except ValidationError as e:
         print(f"\nError: {e}\n")
-    except OSError as e:
+    except StorageError as e:
         print(f"\nError: Could not save the book: {e}\n")
 
 
@@ -57,10 +58,10 @@ def handle_remove() -> None:
 
     try:
         removed = collection.remove_book(title)
-    except ValueError as e:
+    except ValidationError as e:
         print(f"\nError: {e}\n")
         return
-    except OSError as e:
+    except StorageError as e:
         print(f"\nError: Could not save changes: {e}\n")
         return
 
@@ -92,27 +93,29 @@ Commands:
 """)
 
 
+COMMANDS = {
+    "list": handle_list,
+    "add": handle_add,
+    "remove": handle_remove,
+    "find": handle_find,
+    "help": show_help,
+}
+
+
 def main() -> None:
     if len(sys.argv) < 2:
         show_help()
         return
 
     command = sys.argv[1].lower()
+    handler = COMMANDS.get(command)
 
-    if command == "list":
-        handle_list()
-    elif command == "add":
-        handle_add()
-    elif command == "remove":
-        handle_remove()
-    elif command == "find":
-        handle_find()
-    elif command == "help":
-        show_help()
-    else:
+    if handler is None:
         print("Unknown command.\n")
         show_help()
         sys.exit(1)
+
+    handler()
 
 
 if __name__ == "__main__":
