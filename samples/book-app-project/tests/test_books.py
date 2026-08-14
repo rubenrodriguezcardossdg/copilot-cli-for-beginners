@@ -2,6 +2,8 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from datetime import datetime
+
 import pytest
 import books
 from books import Book, BookCollection
@@ -53,6 +55,19 @@ class TestAddBook:
         book = collection.add_book("Unknown Year Book", "Some Author", 0)
 
         assert book.year == 0
+
+    def test_add_book_current_year_is_allowed(self, collection):
+        current_year = datetime.now().year
+        book = collection.add_book("Current Year Book", "Some Author", current_year)
+
+        assert book.year == current_year
+
+    def test_add_book_future_year_raises_validation_error(self, collection):
+        future_year = datetime.now().year + 1
+
+        with pytest.raises(ValueError):
+            collection.add_book("Future Book", "Some Author", future_year)
+        assert len(collection.books) == 0
 
     def test_add_book_returns_book_instance(self, collection):
         book = collection.add_book("1984", "George Orwell", 1949)

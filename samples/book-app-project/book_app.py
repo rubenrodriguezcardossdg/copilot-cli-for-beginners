@@ -36,8 +36,12 @@ def handle_add() -> None:
     author = input("Author: ").strip()
     year_str = input("Year: ").strip()
 
+    if not year_str:
+        print("\nError: Year cannot be empty.\n")
+        return
+
     try:
-        year = int(year_str) if year_str else 0
+        year = int(year_str)
     except ValueError:
         print("\nError: Year must be a whole number.\n")
         return
@@ -80,16 +84,39 @@ def handle_find() -> None:
     show_books(books)
 
 
+def handle_find_year() -> None:
+    print("\nFind Books by Year Range\n")
+
+    start_str = input("Start year: ").strip()
+    end_str = input("End year: ").strip()
+
+    try:
+        start_year = int(start_str)
+        end_year = int(end_str)
+    except ValueError:
+        print("\nError: Start year and end year must be whole numbers.\n")
+        return
+
+    try:
+        books = collection.find_by_year_range(start_year, end_year)
+    except ValidationError as e:
+        print(f"\nError: {e}\n")
+        return
+
+    show_books(books)
+
+
 def show_help() -> None:
     print("""
 Book Collection Helper
 
 Commands:
-  list     - Show all books
-  add      - Add a new book
-  remove   - Remove a book by title
-  find     - Find books by author
-  help     - Show this help message
+  list      - Show all books
+  add       - Add a new book
+  remove    - Remove a book by title
+  find      - Find books by author
+  find-year - Find books by year range
+  help      - Show this help message
 """)
 
 
@@ -98,6 +125,7 @@ COMMANDS = {
     "add": handle_add,
     "remove": handle_remove,
     "find": handle_find,
+    "find-year": handle_find_year,
     "help": show_help,
 }
 

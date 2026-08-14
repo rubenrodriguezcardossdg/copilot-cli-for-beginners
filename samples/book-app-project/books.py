@@ -75,7 +75,8 @@ class Book:
     Attributes:
         title (str): The book's title.
         author (str): The book's author.
-        year (int): The publication year.
+        year (int): The publication year. Must be non-negative and not
+            later than the current calendar year.
         read (bool): Whether the book has been marked as read.
             Defaults to ``False``.
 
@@ -205,15 +206,17 @@ class BookCollection:
             author (str): The book's author. Leading/trailing whitespace is
                 stripped; must not be empty after stripping.
             year (int): The publication year. Must be a non-negative
-                integer (``bool`` values are rejected).
+                integer (``bool`` values are rejected) that is not later
+                than the current calendar year.
 
         Returns:
             Book: The newly created and persisted book.
 
         Raises:
             ValidationError: If title/author are empty, year is not a
-                non-negative integer, or the book (same title and author)
-                already exists in the collection.
+                non-negative integer, year is later than the current year,
+                or the book (same title and author) already exists in the
+                collection.
             StorageError: If the collection cannot be saved to disk.
 
         Example:
@@ -230,6 +233,9 @@ class BookCollection:
             raise ValidationError("Author cannot be empty.")
         if not isinstance(year, int) or isinstance(year, bool) or year < 0:
             raise ValidationError("Year must be a non-negative whole number.")
+        current_year = datetime.now().year
+        if year > current_year:
+            raise ValidationError(f"Year cannot be later than the current year ({current_year}).")
         if any(
             b.title.lower() == title.lower() and b.author.lower() == author.lower()
             for b in self.books
@@ -375,3 +381,37 @@ class BookCollection:
         normalized_author = re.sub(r"\s+", " ", author.strip())
         pattern = re.compile(re.escape(normalized_author), re.IGNORECASE)
         return [b for b in self.books if pattern.search(re.sub(r"\s+", " ", b.author))]
+
+    def find_by_year_range(self, start_year: int, end_year: int) -> List[Book]:
+        """Find all books published within an inclusive year range.
+
+        Args:
+            start_year (int): The earliest publication year to include
+                (inclusive). Must be a non-negative integer (``bool``
+                values are rejected).
+            end_year (int): The latest publication year to include
+                (inclusive). Must be a non-negative integer (``bool``
+                values are rejected) and not earlier than ``start_year``.
+
+        Returns:
+            List[Book]: All books whose ``year`` falls between
+                ``start_year`` and ``end_year`` (inclusive), in insertion
+                order. Returns an empty list if no books match.
+
+        Raises:
+            ValidationError: If either year is not a non-negative integer,
+                or if ``end_year`` is earlier than ``start_year``.
+
+        Example:
+            >>> collection = BookCollection()
+            >>> collection.add_book("Dune", "Frank Herbert", 1965)
+            Book(title='Dune', author='Frank Herbert', year=1965, read=False)
+            >>> collection.find_by_year_range(1960, 1970)
+            [Book(title='Dune', author='Frank Herbert', year=1965, read=False)]
+        """
+        for label, value in (("start_year", start_year), ("end_year", end_year)):
+            if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+                raise ValidationError(f"{label} must be a non-negative whole number.")
+        if end_year < start_year:
+            raise ValidationError("end_year cannot be earlier than start_year.")
+        return [b for b in self.books if start_year <= b.year <= end_year]
