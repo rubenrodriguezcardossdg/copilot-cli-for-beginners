@@ -1,4 +1,5 @@
 import json
+import re
 import shutil
 from contextlib import contextmanager
 from dataclasses import dataclass, asdict
@@ -346,11 +347,16 @@ class BookCollection:
         return False
 
     def find_by_author(self, author: str) -> List[Book]:
-        """Find all books by a given author.
+        """Find all books whose author partially matches a given name.
 
         Args:
-            author (str): The author name to search for (case insensitive,
-                whitespace is ignored).
+            author (str): The author name (or partial name) to search for
+                (case insensitive; leading/trailing whitespace is ignored
+                and any run of internal whitespace is treated as a single
+                space). Any book whose author contains ``author`` as a
+                substring under that normalization is considered a match,
+                so searching for "Tolkien" finds "J.R.R. Tolkien" and
+                "Frank  Herbert" (extra spaces) still finds "Frank Herbert".
 
         Returns:
             List[Book]: All books matching ``author``, in insertion order.
@@ -361,9 +367,11 @@ class BookCollection:
             >>> collection = BookCollection()
             >>> collection.add_book("Dune", "Frank Herbert", 1965)
             Book(title='Dune', author='Frank Herbert', year=1965, read=False)
-            >>> collection.find_by_author("frank herbert")
+            >>> collection.find_by_author("herbert")
             [Book(title='Dune', author='Frank Herbert', year=1965, read=False)]
         """
         if not author or not author.strip():
             return []
-        return [b for b in self.books if b.author.lower() == author.strip().lower()]
+        normalized_author = re.sub(r"\s+", " ", author.strip())
+        pattern = re.compile(re.escape(normalized_author), re.IGNORECASE)
+        return [b for b in self.books if pattern.search(re.sub(r"\s+", " ", b.author))]

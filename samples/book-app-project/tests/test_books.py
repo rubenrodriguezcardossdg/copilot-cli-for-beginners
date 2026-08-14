@@ -195,8 +195,43 @@ class TestFindByAuthor:
     def test_find_by_author_no_match_returns_empty_list(self, populated_collection):
         assert populated_collection.find_by_author("Nobody") == []
 
+    def test_find_by_author_partial_match(self, collection):
+        collection.add_book(
+            "The Fellowship of the Ring", "J.R.R. Tolkien", 1954
+        )
+
+        result = collection.find_by_author("Tolkien")
+
+        assert len(result) == 1
+        assert result[0].title == "The Fellowship of the Ring"
+
+    def test_find_by_author_partial_match_is_case_insensitive(self, collection):
+        collection.add_book(
+            "The Fellowship of the Ring", "J.R.R. Tolkien", 1954
+        )
+
+        result = collection.find_by_author("tolkien")
+
+        assert len(result) == 1
+
     def test_find_by_author_on_empty_collection_returns_empty_list(self, collection):
         assert collection.find_by_author("George Orwell") == []
+
+    def test_find_by_author_ignores_extra_internal_whitespace_in_query(self, collection):
+        collection.add_book("Dune", "Frank Herbert", 1965)
+
+        result = collection.find_by_author("Frank  Herbert")
+
+        assert len(result) == 1
+        assert result[0].title == "Dune"
+
+    def test_find_by_author_matches_when_stored_author_has_extra_whitespace(self, collection):
+        collection.add_book("Dune", "Frank  Herbert", 1965)
+
+        result = collection.find_by_author("Frank Herbert")
+
+        assert len(result) == 1
+        assert result[0].title == "Dune"
 
     def test_find_by_author_with_hyphenated_name(self, collection):
         collection.add_book("Nausea", "Jean-Paul Sartre", 1938)
@@ -216,8 +251,8 @@ class TestFindByAuthor:
     def test_find_by_author_hyphenated_name_requires_exact_hyphenation(self, collection):
         collection.add_book("Nausea", "Jean-Paul Sartre", 1938)
 
-        # A space instead of a hyphen is not the same author string, since
-        # matching is exact (not fuzzy/substring).
+        # A space instead of a hyphen is not a substring of the hyphenated
+        # author string, so it still does not match.
         result = collection.find_by_author("Jean Paul Sartre")
 
         assert result == []
@@ -237,8 +272,9 @@ class TestFindByAuthor:
             "One Hundred Years of Solitude", "Gabriel Jose Garcia Marquez", 1967
         )
 
-        # find_by_author does exact matching, so a partial name (missing
-        # some of the multiple first/middle names) should not match.
+        # find_by_author matches on substrings, but "Gabriel Garcia Marquez"
+        # is not a contiguous substring of "Gabriel Jose Garcia Marquez"
+        # (the middle name "Jose" breaks the sequence), so it should not match.
         result = collection.find_by_author("Gabriel Garcia Marquez")
 
         assert result == []
@@ -278,7 +314,8 @@ class TestFindByAuthor:
         collection.add_book("Blindness", "José Saramago", 1995)
 
         # "Jose" (no accent) is a different string from "José"; matching
-        # is exact, not accent-insensitive/normalized.
+        # is exact on characters, not accent-insensitive/normalized, so a
+        # substring search still won't find it.
         result = collection.find_by_author("Jose Saramago")
 
         assert result == []
