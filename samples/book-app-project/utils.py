@@ -28,15 +28,14 @@ def get_book_details() -> tuple[str, str, int]:
     Takes no parameters; all values are collected interactively from
     standard input:
         - Title: re-prompted until a non-empty value is entered.
-        - Author: entered as-is, no emptiness validation is performed.
+        - Author: re-prompted until a non-empty value is entered.
         - Publication year: converted to ``int``. If the input is not a
           valid integer, a warning is printed and the year defaults to 0.
 
     Returns:
         tuple[str, str, int]: A ``(title, author, year)`` tuple where
-    ``title`` is guaranteed non-empty, ``author`` is the stripped raw
-    input (may be empty), and ``year`` is the publication year (or 0
-    if invalid input was given).
+    ``title`` and ``author`` are guaranteed non-empty, and ``year`` is
+    the publication year (or 0 if invalid input was given).
     """
     title = input("Enter book title: ").strip()
     while not title:
@@ -44,6 +43,9 @@ def get_book_details() -> tuple[str, str, int]:
         title = input("Enter book title: ").strip()
 
     author = input("Enter author: ").strip()
+    while not author:
+        print("Author cannot be empty. Please enter an author name.")
+        author = input("Enter author: ").strip()
 
     year_input = input("Enter publication year: ").strip()
     try:
