@@ -113,6 +113,18 @@ class TestRemoveBook:
         assert populated_collection.find_book_by_title("Dune") is None
         assert len(populated_collection.books) == 2
 
+    @pytest.mark.parametrize(
+        "title",
+        ["dune", "DUNE", "DuNe", "  dune  "],
+        ids=["lowercase", "uppercase", "mixed-case", "case-and-whitespace"],
+    )
+    def test_remove_book_case_insensitive_matching(self, populated_collection, title):
+        result = populated_collection.remove_book(title)
+
+        assert result is True
+        assert populated_collection.find_book_by_title("Dune") is None
+        assert len(populated_collection.books) == 2
+
     def test_remove_nonexistent_book_returns_false(self, populated_collection):
         result = populated_collection.remove_book("Nonexistent Book")
 

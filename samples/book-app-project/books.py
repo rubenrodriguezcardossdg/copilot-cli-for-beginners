@@ -334,7 +334,7 @@ class BookCollection:
             >>> collection = BookCollection()
             >>> collection.add_book("Dune", "Frank Herbert", 1965)
             Book(title='Dune', author='Frank Herbert', year=1965, read=False)
-            >>> collection.remove_book("Dune")
+            >>> collection.remove_book("dune")
             True
         """
         if not title or not title.strip():
