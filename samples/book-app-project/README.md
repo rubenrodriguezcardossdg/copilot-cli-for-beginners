@@ -21,7 +21,7 @@ It can add, remove, and list books. Also mark them as read.
 * `books.py` - BookCollection class with data logic
 * `utils.py` - Helper functions for UI and input
 * `data.json` - Sample book data
-* `tests/test_books.py` - Starter pytest tests
+* `tests/` - Pytest test suite (e.g. `test_books.py`, `test_book_app.py`)
 
 ---
 
@@ -31,6 +31,7 @@ It can add, remove, and list books. Also mark them as read.
 python book_app.py list
 python book_app.py add
 python book_app.py find
+python book_app.py find-year
 python book_app.py remove
 python book_app.py help
 ```

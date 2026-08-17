@@ -228,21 +228,21 @@ class TestHandleFind:
         assert "No books found." in capsys.readouterr().out
 
 
-class TestHandleFindYear:
-    """Tests for handle_find_year."""
+class TestHandleSearchYear:
+    """Tests for handle_search_year."""
 
     def test_matching_range_lists_books(self, mock_inputs, capsys):
         book_app.collection.add_book("Dune", "Frank Herbert", 1965)
         mock_inputs(["1960", "1970"])
 
-        book_app.handle_find_year()
+        book_app.handle_search_year()
 
         assert "Dune by Frank Herbert (1965)" in capsys.readouterr().out
 
     def test_non_numeric_years_print_error(self, mock_inputs, capsys):
         mock_inputs(["abc", "2020"])
 
-        book_app.handle_find_year()
+        book_app.handle_search_year()
 
         out = capsys.readouterr().out
         assert "Error: Start year and end year must be whole numbers." in out
@@ -250,7 +250,7 @@ class TestHandleFindYear:
     def test_end_before_start_prints_validation_error(self, mock_inputs, capsys):
         mock_inputs(["2020", "2010"])
 
-        book_app.handle_find_year()
+        book_app.handle_search_year()
 
         assert "end_year cannot be earlier than start_year" in capsys.readouterr().out
 

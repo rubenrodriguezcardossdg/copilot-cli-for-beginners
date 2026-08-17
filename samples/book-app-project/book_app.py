@@ -84,7 +84,7 @@ def handle_find() -> None:
     show_books(books)
 
 
-def handle_find_year() -> None:
+def handle_search_year() -> None:
     print("\nFind Books by Year Range\n")
 
     start_str = input("Start year: ").strip()
@@ -125,7 +125,7 @@ COMMANDS = {
     "add": handle_add,
     "remove": handle_remove,
     "find": handle_find,
-    "find-year": handle_find_year,
+    "find-year": handle_search_year,
     "help": show_help,
 }
 

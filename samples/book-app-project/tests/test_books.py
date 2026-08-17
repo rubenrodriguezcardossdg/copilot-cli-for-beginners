@@ -401,6 +401,66 @@ class TestListBooks:
         assert [b.title for b in result] == ["1984", "Animal Farm", "Dune"]
 
 
+class TestFindByYearRange:
+    """Tests for BookCollection.find_by_year_range."""
+
+    def test_find_by_year_range_single_match(self, populated_collection):
+        result = populated_collection.find_by_year_range(1960, 1970)
+
+        assert len(result) == 1
+        assert result[0].title == "Dune"
+
+    def test_find_by_year_range_multiple_matches(self, populated_collection):
+        result = populated_collection.find_by_year_range(1940, 1955)
+
+        assert {b.title for b in result} == {"1984", "Animal Farm"}
+
+    def test_find_by_year_range_covering_all_books_returns_all(self, populated_collection):
+        result = populated_collection.find_by_year_range(1900, 2000)
+
+        assert len(result) == 3
+
+    def test_find_by_year_range_start_equal_to_end_matches_exact_year(self, populated_collection):
+        result = populated_collection.find_by_year_range(1965, 1965)
+
+        assert len(result) == 1
+        assert result[0].title == "Dune"
+
+    def test_find_by_year_range_boundaries_are_inclusive(self, populated_collection):
+        result = populated_collection.find_by_year_range(1949, 1965)
+
+        assert {b.title for b in result} == {"1984", "Dune"}
+
+    def test_find_by_year_range_no_matches_returns_empty_list(self, populated_collection):
+        result = populated_collection.find_by_year_range(2000, 2020)
+
+        assert result == []
+
+    def test_find_by_year_range_on_empty_collection_returns_empty_list(self, collection):
+        assert collection.find_by_year_range(1900, 2000) == []
+
+    def test_find_by_year_range_reversed_range_raises_validation_error(self, populated_collection):
+        with pytest.raises(ValueError):
+            populated_collection.find_by_year_range(1970, 1960)
+
+    @pytest.mark.parametrize(
+        "start_year,end_year",
+        [
+            pytest.param(-1, 2000, id="negative-start-year"),
+            pytest.param(1900, -1, id="negative-end-year"),
+            pytest.param(True, 2000, id="bool-start-year"),
+            pytest.param(1900, False, id="bool-end-year"),
+            pytest.param("1960", 2000, id="non-int-start-year"),
+            pytest.param(1900, "2000", id="non-int-end-year"),
+        ],
+    )
+    def test_find_by_year_range_invalid_input_raises_validation_error(
+        self, populated_collection, start_year, end_year
+    ):
+        with pytest.raises(ValueError):
+            populated_collection.find_by_year_range(start_year, end_year)
+
+
 class TestEmptyAndCorruptedDataEdgeCases:
     """Edge cases around empty, missing, and corrupted data files."""
 
